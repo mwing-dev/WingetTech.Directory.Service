@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WingetTech.Directory.Service.Core\WingetTech.Directory.Service.Core.csproj" />
+    <ProjectReference Include="..\WingetTech.Directory.Service.Infrastructure\WingetTech.Directory.Service.Infrastructure.csproj" />
+    <ProjectReference Include="..\WingetTech.Directory.Service.Contracts\WingetTech.Directory.Service.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

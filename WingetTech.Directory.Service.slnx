@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="WingetTech.Directory.Service.Api/WingetTech.Directory.Service.Api.csproj" />
+  <Project Path="WingetTech.Directory.Service.Contracts/WingetTech.Directory.Service.Contracts.csproj" />
+  <Project Path="WingetTech.Directory.Service.Core/WingetTech.Directory.Service.Core.csproj" />
+  <Project Path="WingetTech.Directory.Service.Infrastructure/WingetTech.Directory.Service.Infrastructure.csproj" />
+  <Project Path="WingetTech.Directory.Service.Tests/WingetTech.Directory.Service.Tests.csproj" />
+</Solution>
