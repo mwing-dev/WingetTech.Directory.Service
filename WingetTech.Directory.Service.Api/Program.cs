@@ -1,5 +1,6 @@
 using WingetTech.Directory.Service.Core;
 using WingetTech.Directory.Service.Infrastructure;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddScoped<IDirectoryService, LdapDirectoryService>();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+app.MapOpenApi().AllowAnonymous();
+app.MapScalarApiReference().AllowAnonymous();
 
 // Configure the HTTP request pipeline
 app.UseHttpsRedirection();
