@@ -1,8 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using WingetTech.Directory.Service.Core;
 using WingetTech.Directory.Service.Core.Configuration;
 using WingetTech.Directory.Service.Core.Interfaces;
 using WingetTech.Directory.Service.Infrastructure;
+using WingetTech.Directory.Service.Infrastructure.Persistence;
+using WingetTech.Directory.Service.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +22,25 @@ builder.Services.Configure<DirectoryOptions>(
 // Register directory service
 builder.Services.AddScoped<IDirectoryService, LdapDirectoryService>();
 
+// Register database context
+builder.Services.AddDbContext<DirectoryDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DirectoryDb") ?? "Data Source=directory.db"));
+
+// Register database settings services
+builder.Services.AddScoped<IEncryptionService, PlainTextEncryptionService>();
+builder.Services.AddScoped<IDatabaseSettingsService, DatabaseSettingsService>();
+
 // Add health checks
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+// Ensure the database schema is created
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DirectoryDbContext>();
+    db.Database.EnsureCreated();
+}
 
 app.MapOpenApi().AllowAnonymous();
 app.MapScalarApiReference().AllowAnonymous();

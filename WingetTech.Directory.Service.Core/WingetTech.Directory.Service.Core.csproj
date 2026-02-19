@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WingetTech.Directory.Service.Contracts\WingetTech.Directory.Service.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>
