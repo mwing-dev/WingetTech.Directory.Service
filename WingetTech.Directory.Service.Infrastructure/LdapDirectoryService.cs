@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
-using WingetTech.Directory.Service.Core;
-using WingetTech.Directory.Service.Contracts;
+using WingetTech.Directory.Service.Core.Configuration;
+using WingetTech.Directory.Service.Core.Entities;
+using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Infrastructure;
 
@@ -11,43 +12,60 @@ public class LdapDirectoryService : IDirectoryService
 {
     private readonly DirectoryOptions _options;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LdapDirectoryService"/> class.
+    /// </summary>
+    /// <param name="options">The directory configuration options.</param>
     public LdapDirectoryService(IOptions<DirectoryOptions> options)
     {
         _options = options.Value;
     }
 
     /// <inheritdoc />
-    public Task<bool> AuthenticateAsync(string username, string password, CancellationToken cancellationToken = default)
+    public Task<DirectoryUser?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement LDAP authentication
         throw new NotImplementedException();
     }
 
     /// <inheritdoc />
-    public Task<object?> GetUserAsync(string username, CancellationToken cancellationToken = default)
+    public Task<DirectoryUser?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement LDAP user retrieval
         throw new NotImplementedException();
     }
 
     /// <inheritdoc />
-    public Task<object?> GetGroupAsync(string groupName, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyCollection<DirectoryUser>> SearchUsersAsync(string searchFilter, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement LDAP group retrieval
         throw new NotImplementedException();
     }
 
     /// <inheritdoc />
-    public Task<IEnumerable<object>> SearchUsersAsync(string searchFilter, CancellationToken cancellationToken = default)
+    public Task<DirectoryGroup?> GetGroupAsync(string groupIdentifier, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement LDAP user search
         throw new NotImplementedException();
     }
 
     /// <inheritdoc />
-    public Task<IEnumerable<object>> SearchGroupsAsync(string searchFilter, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyCollection<DirectoryGroup>> SearchGroupsAsync(string searchFilter, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement LDAP group search
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public Task<IReadOnlyCollection<DirectoryGroup>> GetUserGroupsAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public Task<DirectoryOrganizationalUnit?> GetOrganizationalUnitAsync(string distinguishedName, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public Task<bool> HealthCheckAsync(CancellationToken cancellationToken = default)
+    {
         throw new NotImplementedException();
     }
 }

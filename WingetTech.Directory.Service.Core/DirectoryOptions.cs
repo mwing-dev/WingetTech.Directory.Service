@@ -1,4 +1,4 @@
-namespace WingetTech.Directory.Service.Core;
+namespace WingetTech.Directory.Service.Core.Configuration;
 
 /// <summary>
 /// Configuration options for connecting to a directory service.
