@@ -10,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
-
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApi();
 // Configure strongly-typed settings
 builder.Services.Configure<DirectoryOptions>(
     builder.Configuration.GetSection("Directory"));
