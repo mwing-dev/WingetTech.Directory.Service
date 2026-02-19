@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.12.44" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\WingetTech.Directory.Service.Core\WingetTech.Directory.Service.Core.csproj" />
     <ProjectReference Include="..\WingetTech.Directory.Service.Infrastructure\WingetTech.Directory.Service.Infrastructure.csproj" />
     <ProjectReference Include="..\WingetTech.Directory.Service.Contracts\WingetTech.Directory.Service.Contracts.csproj" />
