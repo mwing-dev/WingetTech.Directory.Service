@@ -1,3 +1,5 @@
+using WingetTech.Directory.Service.Contracts;
+
 namespace WingetTech.Directory.Service.Core.Interfaces;
 
 /// <summary>
@@ -13,4 +15,11 @@ public interface IAuthenticationProbe
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result indicates whether the bind was successful.</returns>
     Task<bool> TestBindAsync(string username, string password, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Tests the service account LDAP bind using persisted <see cref="DirectorySettingsDto"/> credentials.
+    /// </summary>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>A structured response indicating success or failure, without exposing credentials.</returns>
+    Task<TestBindResponseDto> TestServiceBindAsync(CancellationToken cancellationToken = default);
 }

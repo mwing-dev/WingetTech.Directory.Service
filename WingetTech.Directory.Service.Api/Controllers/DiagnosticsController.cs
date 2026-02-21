@@ -46,23 +46,15 @@ public class DiagnosticsController : ControllerBase
     }
 
     /// <summary>
-    /// Tests authentication binding with the provided credentials.
+    /// Tests the LDAP service account bind using persisted directory settings.
     /// </summary>
-    /// <param name="request">The authentication request containing username and password.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>The authentication test result.</returns>
+    /// <returns>A structured response indicating whether the bind succeeded.</returns>
     [HttpPost("test-bind")]
-    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AuthResponseDto>> TestBind([FromBody] AuthRequestDto request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(TestBindResponseDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<TestBindResponseDto>> TestBind(CancellationToken cancellationToken)
     {
-        var success = await _authenticationProbe.TestBindAsync(request.Username, request.Password, cancellationToken);
-        
-        var result = new AuthResponseDto(
-            success,
-            success ? "Authentication successful" : "Authentication failed",
-            null
-        );
-
+        var result = await _authenticationProbe.TestServiceBindAsync(cancellationToken);
         return Ok(result);
     }
 }
