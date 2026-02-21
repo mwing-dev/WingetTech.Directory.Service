@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using WingetTech.Directory.Service.Core;
 using WingetTech.Directory.Service.Core.Configuration;
@@ -19,10 +20,26 @@ builder.Services.Configure<DirectoryOptions>(
 // Register directory service
 builder.Services.AddScoped<IDirectoryService, LdapDirectoryService>();
 
+// Register settings services
+builder.Services.AddScoped<IDirectorySettingsService, DirectorySettingsService>();
+builder.Services.AddScoped<IEncryptionService, PlainTextEncryptionService>();
+
+// Configure EF Core with SQLite
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? "Data Source=directory.db"));
+
 // Add health checks
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+// Ensure database is created
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+}
 
 app.MapOpenApi().AllowAnonymous();
 app.MapScalarApiReference().AllowAnonymous();
