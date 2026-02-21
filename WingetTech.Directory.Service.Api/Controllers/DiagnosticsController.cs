@@ -45,24 +45,33 @@ public class DiagnosticsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Tests authentication binding with the provided credentials.
-    /// </summary>
-    /// <param name="request">The authentication request containing username and password.</param>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>The authentication test result.</returns>
     [HttpPost("test-bind")]
-    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AuthResponseDto>> TestBind([FromBody] AuthRequestDto request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(TestBindResponseDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<TestBindResponseDto>> TestBind(
+        CancellationToken cancellationToken)
     {
-        var success = await _authenticationProbe.TestBindAsync(request.Username, request.Password, cancellationToken);
-        
-        var result = new AuthResponseDto(
-            success,
-            success ? "Authentication successful" : "Authentication failed",
-            null
-        );
+        try
+        {
+            var success = await _authenticationProbe.TestBindAsync(cancellationToken);
 
-        return Ok(result);
+            var result = new TestBindResponseDto(
+                success,
+                success ? null : "LDAP bind failed.",
+                DateTime.UtcNow
+            );
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            // Don't leak sensitive details
+            var result = new TestBindResponseDto(
+                false,
+                ex.Message,
+                DateTime.UtcNow
+            );
+
+            return Ok(result);
+        }
     }
 }
