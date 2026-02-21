@@ -1,110 +1,63 @@
 using System.DirectoryServices.Protocols;
 using System.Net;
-using WingetTech.Directory.Service.Contracts;
 using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Infrastructure;
 
 /// <summary>
-/// LDAP implementation of authentication probing using persisted <see cref="DirectorySettings"/>.
+/// LDAP implementation of authentication probing.
 /// </summary>
 public class LdapAuthenticationProbe : IAuthenticationProbe
 {
-    private readonly IDirectorySettingsService _settingsService;
+    private readonly IDirectorySettingsService _directorySettingsService;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LdapAuthenticationProbe"/> class.
-    /// </summary>
-    /// <param name="settingsService">The directory settings service.</param>
-    public LdapAuthenticationProbe(IDirectorySettingsService settingsService)
+    public LdapAuthenticationProbe(IDirectorySettingsService directorySettingsService)
     {
-        _settingsService = settingsService;
+        _directorySettingsService = directorySettingsService;
     }
 
     /// <inheritdoc />
-    public async Task<bool> TestBindAsync(string username, string password, CancellationToken cancellationToken = default)
+    public async Task<bool> TestBindAsync(CancellationToken cancellationToken = default)
     {
-        var settings = await _settingsService.GetAsync();
+        var settings = await _directorySettingsService.GetAsync();
+
         if (settings is null)
-            return false;
+            throw new InvalidOperationException("Directory settings are not configured.");
+
+        var identifier = new LdapDirectoryIdentifier(settings.Host, settings.Port);
+
+        using var connection = new LdapConnection(identifier)
+        {
+            AuthType = AuthType.Basic
+        };
+
+        connection.SessionOptions.ProtocolVersion = 3;
+
+        if (settings.UseSsl)
+            connection.SessionOptions.SecureSocketLayer = true;
+
+        var credential = new NetworkCredential(
+            settings.BindUsername,
+            settings.BindPassword);
 
         try
         {
-            using var connection = BuildConnection(settings);
-            var bindDn = BuildBindDn(username, settings.Domain);
-            connection.Bind(new NetworkCredential(bindDn, password));
+            connection.Bind(credential);
+
+            // Optional: verify BaseDn exists
+            var request = new SearchRequest(
+                settings.BaseDn,
+                "(objectClass=*)",
+                SearchScope.Base,
+                null);
+
+            connection.SendRequest(request);
+
             return true;
         }
         catch (LdapException)
         {
             return false;
         }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<TestBindResponseDto> TestServiceBindAsync(CancellationToken cancellationToken = default)
-    {
-        var timestamp = DateTime.UtcNow;
-
-        var settings = await _settingsService.GetAsync();
-        if (settings is null)
-        {
-            return new TestBindResponseDto(
-                false,
-                "No directory settings have been configured.",
-                timestamp);
-        }
-
-        try
-        {
-            using var connection = BuildConnection(settings);
-            var bindDn = BuildBindDn(settings.BindUsername, settings.Domain);
-            connection.Bind(new NetworkCredential(bindDn, settings.BindPassword));
-
-            // Validate BaseDn exists via a lightweight scope-base search
-            var searchRequest = new SearchRequest(
-                settings.BaseDn,
-                "(objectClass=*)",
-                SearchScope.Base,
-                "distinguishedName");
-
-            connection.SendRequest(searchRequest);
-
-            return new TestBindResponseDto(true, null, timestamp);
-        }
-        catch (LdapException ex)
-        {
-            return new TestBindResponseDto(false, $"LDAP error ({ex.ErrorCode}): {ex.Message}", timestamp);
-        }
-        catch (Exception ex)
-        {
-            return new TestBindResponseDto(false, ex.Message, timestamp);
-        }
-    }
-
-    private static LdapConnection BuildConnection(DirectorySettingsDto settings)
-    {
-        var identifier = new LdapDirectoryIdentifier(settings.Host, settings.Port, false, false);
-        var connection = new LdapConnection(identifier)
-        {
-            AuthType = AuthType.Basic
-        };
-        connection.SessionOptions.ProtocolVersion = 3;
-        connection.SessionOptions.SecureSocketLayer = settings.UseSsl;
-        return connection;
-    }
-
-    private static string BuildBindDn(string username, string domain)
-    {
-        if (username.Contains('@') || username.Contains('\\'))
-            return username;
-
-        return string.IsNullOrWhiteSpace(domain)
-            ? username
-            : $"{username}@{domain}";
     }
 }
