@@ -71,16 +71,45 @@ public class LdapDirectoryService : IDirectoryService
         return await SearchUsersInternalAsync(settings, filter, cancellationToken);
     }
 
+    private static readonly string[] GroupAttributes =
+    [
+        "objectGUID", "cn", "displayName", "distinguishedName",
+        "description", "member"
+    ];
+
     /// <inheritdoc />
-    public Task<DirectoryGroup?> GetGroupAsync(string groupIdentifier, CancellationToken cancellationToken = default)
+    public async Task<DirectoryGroup?> GetGroupAsync(string groupIdentifier, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var settings = await _settingsService.GetAsync();
+        if (settings is null)
+            return null;
+
+        string filter;
+        if (Guid.TryParse(groupIdentifier, out var guid))
+        {
+            var octetFilter = BuildGuidFilter(guid);
+            filter = $"(&(objectClass=group)(objectGUID={octetFilter}))";
+        }
+        else
+        {
+            var escapedDn = EscapeLdapFilter(groupIdentifier);
+            filter = $"(&(objectClass=group)(distinguishedName={escapedDn}))";
+        }
+
+        return await SearchSingleGroupAsync(settings, filter, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<IReadOnlyCollection<DirectoryGroup>> SearchGroupsAsync(string searchFilter, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<DirectoryGroup>> SearchGroupsAsync(string searchFilter, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var settings = await _settingsService.GetAsync();
+        if (settings is null)
+            return Array.Empty<DirectoryGroup>();
+
+        var escaped = EscapeLdapFilter(searchFilter);
+        var filter = $"(&(objectClass=group)(|(cn=*{escaped}*)(displayName=*{escaped}*)))";
+
+        return await SearchGroupsInternalAsync(settings, filter, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -159,6 +188,68 @@ public class LdapDirectoryService : IDirectoryService
         {
             return false;
         }
+    }
+
+    private async Task<DirectoryGroup?> SearchSingleGroupAsync(
+        Contracts.DirectorySettingsDto settings,
+        string filter,
+        CancellationToken cancellationToken)
+    {
+        var results = await SearchGroupsInternalAsync(settings, filter, cancellationToken);
+        return results.FirstOrDefault();
+    }
+
+    private Task<IReadOnlyCollection<DirectoryGroup>> SearchGroupsInternalAsync(
+        Contracts.DirectorySettingsDto settings,
+        string filter,
+        CancellationToken cancellationToken)
+    {
+        return Task.Run(() =>
+        {
+            using var connection = BuildConnection(settings);
+            Bind(connection, settings);
+
+            var searchRequest = new SearchRequest(
+                settings.BaseDn,
+                filter,
+                SearchScope.Subtree,
+                GroupAttributes);
+
+            var response = (SearchResponse)connection.SendRequest(searchRequest);
+
+            var groups = new List<DirectoryGroup>();
+            foreach (SearchResultEntry entry in response.Entries)
+            {
+                groups.Add(MapToDirectoryGroup(entry));
+            }
+
+            return (IReadOnlyCollection<DirectoryGroup>)groups;
+        }, cancellationToken);
+    }
+
+    private static DirectoryGroup MapToDirectoryGroup(SearchResultEntry entry)
+    {
+        var objectGuidBytes = entry.Attributes["objectGUID"]?[0] as byte[];
+        var objectGuid = objectGuidBytes is not null
+            ? new Guid(objectGuidBytes).ToString()
+            : string.Empty;
+
+        var members = new List<string>();
+        var memberAttr = entry.Attributes["member"];
+        if (memberAttr is not null)
+        {
+            foreach (string dn in memberAttr.GetValues(typeof(string)).Cast<string>())
+                members.Add(dn);
+        }
+
+        return new DirectoryGroup
+        {
+            Id = string.IsNullOrEmpty(objectGuid) ? entry.DistinguishedName : objectGuid,
+            Name = GetStringAttribute(entry, "cn"),
+            DistinguishedName = entry.DistinguishedName,
+            Description = GetStringAttribute(entry, "description") is { Length: > 0 } desc ? desc : null,
+            Members = members
+        };
     }
 
     private async Task<DirectoryUser?> SearchSingleUserAsync(

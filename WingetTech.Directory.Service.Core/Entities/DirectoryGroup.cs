@@ -21,6 +21,11 @@ public class DirectoryGroup
     public string? DistinguishedName { get; set; }
 
     /// <summary>
+    /// Gets or sets the description of the group.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of user IDs that are members of this group.
     /// </summary>
     public IReadOnlyCollection<string> Members { get; set; } = Array.Empty<string>();

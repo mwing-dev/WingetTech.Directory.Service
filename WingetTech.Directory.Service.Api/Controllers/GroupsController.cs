@@ -43,7 +43,8 @@ public class GroupsController : ControllerBase
             group.Id,
             group.Name,
             group.DistinguishedName,
-            group.Members
+            group.Members,
+            group.Description
         );
 
         return Ok(groupDto);
@@ -57,15 +58,20 @@ public class GroupsController : ControllerBase
     /// <returns>A collection of groups matching the search criteria.</returns>
     [HttpGet("search")]
     [ProducesResponseType(typeof(GroupSearchResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<GroupSearchResultDto>> SearchGroups([FromQuery] string filter, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(filter))
+            return BadRequest("A non-empty filter is required.");
+
         var groups = await _directoryService.SearchGroupsAsync(filter, cancellationToken);
         
         var groupDtos = groups.Select(g => new GroupDto(
             g.Id,
             g.Name,
             g.DistinguishedName,
-            g.Members
+            g.Members,
+            g.Description
         )).ToList();
 
         var result = new GroupSearchResultDto(groupDtos, groupDtos.Count);
