@@ -20,6 +20,9 @@ builder.Services.Configure<DirectoryOptions>(
 // Register directory service
 builder.Services.AddScoped<IDirectoryService, LdapDirectoryService>();
 
+// Register authentication probe
+builder.Services.AddScoped<IAuthenticationProbe, LdapAuthenticationProbe>();
+
 // Register settings services
 builder.Services.AddScoped<IDirectorySettingsService, DirectorySettingsService>();
 builder.Services.AddScoped<IEncryptionService, PlainTextEncryptionService>();

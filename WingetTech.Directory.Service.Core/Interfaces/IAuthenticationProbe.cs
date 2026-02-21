@@ -6,11 +6,12 @@ namespace WingetTech.Directory.Service.Core.Interfaces;
 public interface IAuthenticationProbe
 {
     /// <summary>
-    /// Tests authentication by attempting to bind with the provided credentials.
+    /// Tests the LDAP bind using the persisted <c>DirectorySettings</c>.
     /// </summary>
-    /// <param name="username">The username to test.</param>
-    /// <param name="password">The password to test.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result indicates whether the bind was successful.</returns>
-    Task<bool> TestBindAsync(string username, string password, CancellationToken cancellationToken = default);
+    /// <returns>
+    /// A tuple of (<c>success</c>, <c>errorMessage</c>) where <c>errorMessage</c> is
+    /// <c>null</c> on success and contains a diagnostic message on failure.
+    /// </returns>
+    Task<(bool Success, string? ErrorMessage)> TestBindAsync(CancellationToken cancellationToken = default);
 }

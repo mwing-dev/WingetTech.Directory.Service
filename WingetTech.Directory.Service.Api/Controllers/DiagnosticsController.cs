@@ -35,7 +35,7 @@ public class DiagnosticsController : ControllerBase
     public async Task<ActionResult<HealthCheckDto>> HealthCheck(CancellationToken cancellationToken)
     {
         var isHealthy = await _directoryService.HealthCheckAsync(cancellationToken);
-        
+
         var result = new HealthCheckDto(
             isHealthy,
             isHealthy ? "Directory service is healthy" : "Directory service is unhealthy",
@@ -46,23 +46,17 @@ public class DiagnosticsController : ControllerBase
     }
 
     /// <summary>
-    /// Tests authentication binding with the provided credentials.
+    /// Tests LDAP connectivity using the persisted <c>DirectorySettings</c>.
+    /// No credentials are accepted from the caller; the configured bind credentials are used.
     /// </summary>
-    /// <param name="request">The authentication request containing username and password.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>The authentication test result.</returns>
+    /// <returns>A structured result containing success status, an optional error message, and a timestamp.</returns>
     [HttpPost("test-bind")]
-    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AuthResponseDto>> TestBind([FromBody] AuthRequestDto request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(TestBindResponseDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<TestBindResponseDto>> TestBind(CancellationToken cancellationToken)
     {
-        var success = await _authenticationProbe.TestBindAsync(request.Username, request.Password, cancellationToken);
-        
-        var result = new AuthResponseDto(
-            success,
-            success ? "Authentication successful" : "Authentication failed",
-            null
-        );
+        var (success, errorMessage) = await _authenticationProbe.TestBindAsync(cancellationToken);
 
-        return Ok(result);
+        return Ok(new TestBindResponseDto(success, errorMessage, DateTime.UtcNow));
     }
 }
