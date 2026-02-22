@@ -1,7 +1,8 @@
-namespace WingetTech.Directory.Service.Contracts;
-
-public record TestBindResponseDto(
-    bool Success,
-    string? ErrorMessage,
-    DateTime Timestamp
-);
+namespace WingetTech.Directory.Service.Contracts
+{
+    public record TestBindResponseDto(
+        bool Success,
+        string? ErrorMessage,
+        DateTime Timestamp
+    );
+}

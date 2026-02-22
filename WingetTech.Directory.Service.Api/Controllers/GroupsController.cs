@@ -2,60 +2,61 @@ using Microsoft.AspNetCore.Mvc;
 using WingetTech.Directory.Service.Contracts;
 using WingetTech.Directory.Service.Core.Interfaces;
 
-namespace WingetTech.Directory.Service.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class GroupsController : ControllerBase
+namespace WingetTech.Directory.Service.Api.Controllers
 {
-    private readonly IDirectoryService _directoryService;
-
-    public GroupsController(IDirectoryService directoryService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GroupsController : ControllerBase
     {
-        _directoryService = directoryService;
-    }
+        private readonly IDirectoryService _directoryService;
 
-    [HttpGet("{identifier}")]
-    [ProducesResponseType(typeof(GroupDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GroupDto>> GetGroup(string identifier, CancellationToken cancellationToken)
-    {
-        var group = await _directoryService.GetGroupAsync(identifier, cancellationToken);
-        if (group == null)
+        public GroupsController(IDirectoryService directoryService)
         {
-            return NotFound();
+            _directoryService = directoryService;
         }
 
-        var groupDto = new GroupDto(
-            group.Id,
-            group.Name,
-            group.DistinguishedName,
-            group.Members,
-            group.Description
-        );
+        [HttpGet("{identifier}")]
+        [ProducesResponseType(typeof(GroupDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<GroupDto>> GetGroup(string identifier, CancellationToken cancellationToken)
+        {
+            var group = await _directoryService.GetGroupAsync(identifier, cancellationToken);
+            if (group == null)
+            {
+                return NotFound();
+            }
 
-        return Ok(groupDto);
-    }
+            var groupDto = new GroupDto(
+                group.Id,
+                group.Name,
+                group.DistinguishedName,
+                group.Members,
+                group.Description
+            );
 
-    [HttpGet("search")]
-    [ProducesResponseType(typeof(GroupSearchResultDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<GroupSearchResultDto>> SearchGroups([FromQuery] string filter, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(filter))
-            return BadRequest("A non-empty filter is required.");
+            return Ok(groupDto);
+        }
 
-        var groups = await _directoryService.SearchGroupsAsync(filter, cancellationToken);
-        
-        var groupDtos = groups.Select(g => new GroupDto(
-            g.Id,
-            g.Name,
-            g.DistinguishedName,
-            g.Members,
-            g.Description
-        )).ToList();
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(GroupSearchResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<GroupSearchResultDto>> SearchGroups([FromQuery] string filter, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(filter))
+                return BadRequest("A non-empty filter is required.");
 
-        var result = new GroupSearchResultDto(groupDtos, groupDtos.Count);
-        return Ok(result);
+            var groups = await _directoryService.SearchGroupsAsync(filter, cancellationToken);
+
+            var groupDtos = groups.Select(g => new GroupDto(
+                g.Id,
+                g.Name,
+                g.DistinguishedName,
+                g.Members,
+                g.Description
+            )).ToList();
+
+            var result = new GroupSearchResultDto(groupDtos, groupDtos.Count);
+            return Ok(result);
+        }
     }
 }

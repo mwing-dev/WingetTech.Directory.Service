@@ -1,7 +1,8 @@
-namespace WingetTech.Directory.Service.Core.Interfaces;
-
-public interface IEncryptionService
+namespace WingetTech.Directory.Service.Core.Interfaces
 {
-    string Encrypt(string value);
-    string Decrypt(string value);
+    public interface IEncryptionService
+    {
+        string Encrypt(string value);
+        string Decrypt(string value);
+    }
 }

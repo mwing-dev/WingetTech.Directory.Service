@@ -4,7 +4,6 @@ namespace WingetTech.Directory.Service.Core.Interfaces
 {
     public interface IDirectoryService
     {
-
         Task<DirectoryUser?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
 
         Task<DirectoryUser?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);
@@ -21,5 +20,4 @@ namespace WingetTech.Directory.Service.Core.Interfaces
 
         Task<bool> HealthCheckAsync(CancellationToken cancellationToken = default);
     }
-
-};
+}

@@ -1,19 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace WingetTech.Directory.Service.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class HealthController : ControllerBase
+namespace WingetTech.Directory.Service.Api.Controllers
 {
-    [HttpGet]
-    public IActionResult Get()
+    [ApiController]
+    [Route("api/[controller]")]
+    public class HealthController : ControllerBase
     {
-        return Ok(new
+        [HttpGet]
+        public IActionResult Get()
         {
-            Status = "Healthy",
-            Timestamp = DateTime.UtcNow,
-            Service = "WingetTech.Directory.Service"
-        });
+            return Ok(new
+            {
+                Status = "Healthy",
+                Timestamp = DateTime.UtcNow,
+                Service = "WingetTech.Directory.Service"
+            });
+        }
     }
 }

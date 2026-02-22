@@ -1,23 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using WingetTech.Directory.Service.Core.Entities;
 
-namespace WingetTech.Directory.Service.Infrastructure;
-public class AppDbContext : DbContext
+namespace WingetTech.Directory.Service.Infrastructure
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
-    public DbSet<DirectorySettings> DirectorySettings => Set<DirectorySettings>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class AppDbContext : DbContext
     {
-        modelBuilder.Entity<DirectorySettings>(entity =>
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+        public DbSet<DirectorySettings> DirectorySettings => Set<DirectorySettings>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Host).IsRequired();
-            entity.Property(e => e.Domain).IsRequired();
-            entity.Property(e => e.BaseDn).IsRequired();
-            entity.Property(e => e.BindUsername).IsRequired();
-            entity.Property(e => e.BindPassword).IsRequired();
-        });
+            modelBuilder.Entity<DirectorySettings>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Host).IsRequired();
+                entity.Property(e => e.Domain).IsRequired();
+                entity.Property(e => e.BaseDn).IsRequired();
+                entity.Property(e => e.BindUsername).IsRequired();
+                entity.Property(e => e.BindPassword).IsRequired();
+            });
+        }
     }
 }
