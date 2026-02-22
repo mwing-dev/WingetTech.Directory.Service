@@ -1,4 +1,5 @@
 namespace WingetTech.Directory.Service.Core.Configuration;
+
 public class DirectoryOptions
 {
     public string Host { get; set; } = string.Empty;
