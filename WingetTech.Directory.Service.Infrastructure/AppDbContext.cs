@@ -2,10 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using WingetTech.Directory.Service.Core.Entities;
 
 namespace WingetTech.Directory.Service.Infrastructure;
-
-/// <summary>
-/// Entity Framework database context for the directory service.
-/// </summary>
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }

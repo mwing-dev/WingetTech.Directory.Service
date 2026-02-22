@@ -4,10 +4,6 @@ using WingetTech.Directory.Service.Core.Entities;
 using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Infrastructure;
-
-/// <summary>
-/// LDAP implementation of the directory service using persisted <see cref="DirectorySettings"/>.
-/// </summary>
 public class LdapDirectoryService : IDirectoryService
 {
     private readonly IDirectorySettingsService _settingsService;
@@ -18,24 +14,17 @@ public class LdapDirectoryService : IDirectoryService
         "distinguishedName", "userAccountControl", "memberOf",
         "whenCreated", "whenChanged"
     ];
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LdapDirectoryService"/> class.
-    /// </summary>
-    /// <param name="settingsService">The directory settings service.</param>
     public LdapDirectoryService(IDirectorySettingsService settingsService)
     {
         _settingsService = settingsService;
     }
 
-    /// <inheritdoc />
     public async Task<DirectoryUser?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
         if (settings is null)
             return null;
 
-        // Convert GUID string to octet-string filter format for objectGUID
         if (!Guid.TryParse(userId, out var guid))
             return null;
 
@@ -45,7 +34,6 @@ public class LdapDirectoryService : IDirectoryService
         return await SearchSingleUserAsync(settings, filter, cancellationToken);
     }
 
-    /// <inheritdoc />
     public async Task<DirectoryUser?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
@@ -58,7 +46,6 @@ public class LdapDirectoryService : IDirectoryService
         return await SearchSingleUserAsync(settings, filter, cancellationToken);
     }
 
-    /// <inheritdoc />
     public async Task<IReadOnlyCollection<DirectoryUser>> SearchUsersAsync(string searchFilter, CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
@@ -77,7 +64,6 @@ public class LdapDirectoryService : IDirectoryService
         "description", "member"
     ];
 
-    /// <inheritdoc />
     public async Task<DirectoryGroup?> GetGroupAsync(string groupIdentifier, CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
@@ -99,7 +85,6 @@ public class LdapDirectoryService : IDirectoryService
         return await SearchSingleGroupAsync(settings, filter, cancellationToken);
     }
 
-    /// <inheritdoc />
     public async Task<IReadOnlyCollection<DirectoryGroup>> SearchGroupsAsync(string searchFilter, CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
@@ -112,7 +97,6 @@ public class LdapDirectoryService : IDirectoryService
         return await SearchGroupsInternalAsync(settings, filter, cancellationToken);
     }
 
-    /// <inheritdoc />
     public async Task<IReadOnlyCollection<DirectoryGroup>> GetUserGroupsAsync(string userId, CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
@@ -125,7 +109,6 @@ public class LdapDirectoryService : IDirectoryService
         var octetFilter = BuildGuidFilter(guid);
         var filter = $"(&(objectClass=user)(objectGUID={octetFilter}))";
 
-        // First get the user to retrieve their memberOf attribute
         using var connection = BuildConnection(settings);
         Bind(connection, settings);
 
@@ -161,7 +144,6 @@ public class LdapDirectoryService : IDirectoryService
         return groups;
     }
 
-    /// <inheritdoc />
     public async Task<DirectoryOrganizationalUnit?> GetOrganizationalUnitAsync(string distinguishedName, CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
@@ -198,7 +180,6 @@ public class LdapDirectoryService : IDirectoryService
         }, cancellationToken);
     }
 
-    /// <inheritdoc />
     public async Task<bool> HealthCheckAsync(CancellationToken cancellationToken = default)
     {
         var settings = await _settingsService.GetAsync();
@@ -342,7 +323,6 @@ public class LdapDirectoryService : IDirectoryService
 
     private static string BuildBindDn(Contracts.DirectorySettingsDto settings)
     {
-        // Support both UPN (user@domain) and pre-configured BindUsername
         if (settings.BindUsername.Contains('@') || settings.BindUsername.Contains('\\'))
             return settings.BindUsername;
 
@@ -359,7 +339,6 @@ public class LdapDirectoryService : IDirectoryService
             : string.Empty;
 
         var uac = GetIntAttribute(entry, "userAccountControl");
-        // Bit 2 (0x2) = account disabled; uac == 0 means attribute absent — treat as disabled
         var enabled = uac != 0 && (uac & 0x2) == 0;
 
         return new DirectoryUser
@@ -396,7 +375,6 @@ public class LdapDirectoryService : IDirectoryService
         if (string.IsNullOrEmpty(raw))
             return null;
 
-        // AD format: yyyyMMddHHmmss.0Z
         if (DateTime.TryParseExact(raw, "yyyyMMddHHmmss.0'Z'",
             System.Globalization.CultureInfo.InvariantCulture,
             System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
@@ -407,19 +385,11 @@ public class LdapDirectoryService : IDirectoryService
 
         return null;
     }
-
-    /// <summary>
-    /// Encodes a GUID as an LDAP octet-string filter component for objectGUID searches.
-    /// </summary>
     private static string BuildGuidFilter(Guid guid)
     {
         var bytes = guid.ToByteArray();
         return string.Concat(bytes.Select(b => $"\\{b:x2}"));
     }
-
-    /// <summary>
-    /// Escapes special characters in an LDAP filter value per RFC 4515.
-    /// </summary>
     private static string EscapeLdapFilter(string value)
     {
         return value

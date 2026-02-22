@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WingetTech.Directory.Service.Contracts;
 
-/// <summary>
-/// Data transfer object for directory connection settings.
-/// </summary>
 public class DirectorySettingsDto
 {
     [Required]

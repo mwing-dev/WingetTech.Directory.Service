@@ -4,10 +4,6 @@ using WingetTech.Directory.Service.Core.Entities;
 using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Infrastructure;
-
-/// <summary>
-/// Persists and retrieves directory connection settings as a singleton row in the database.
-/// </summary>
 public class DirectorySettingsService : IDirectorySettingsService
 {
     private readonly AppDbContext _db;
@@ -18,8 +14,6 @@ public class DirectorySettingsService : IDirectorySettingsService
         _db = db;
         _encryption = encryption;
     }
-
-    /// <inheritdoc />
     public async Task SaveAsync(DirectorySettingsDto dto)
     {
         var existing = await _db.DirectorySettings.FirstOrDefaultAsync();
@@ -54,8 +48,6 @@ public class DirectorySettingsService : IDirectorySettingsService
 
         await _db.SaveChangesAsync();
     }
-
-    /// <inheritdoc />
     public async Task<DirectorySettingsDto?> GetAsync()
     {
         var settings = await _db.DirectorySettings.FirstOrDefaultAsync();
