@@ -7,9 +7,11 @@ namespace WingetTech.Directory.Service.Contracts;
 /// <param name="Name">The name of the group.</param>
 /// <param name="DistinguishedName">The distinguished name of the group in the directory.</param>
 /// <param name="Members">Collection of user IDs that are members of this group.</param>
+/// <param name="Description">Optional description of the group.</param>
 public record GroupDto(
     string Id,
     string Name,
     string? DistinguishedName,
-    IReadOnlyCollection<string> Members
+    IReadOnlyCollection<string> Members,
+    string? Description = null
 );
