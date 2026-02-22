@@ -1,10 +1,11 @@
 using WingetTech.Directory.Service.Core.Interfaces;
 
-namespace WingetTech.Directory.Service.Infrastructure;
-
-/// WARNING: This implementation stores credentials as plain text.
-public class PlainTextEncryptionService : IEncryptionService
+namespace WingetTech.Directory.Service.Infrastructure
 {
-    public string Encrypt(string value) => value;
-    public string Decrypt(string value) => value;
+    /// WARNING: This implementation stores credentials as plain text.
+    public class PlainTextEncryptionService : IEncryptionService
+    {
+        public string Encrypt(string value) => value;
+        public string Decrypt(string value) => value;
+    }
 }

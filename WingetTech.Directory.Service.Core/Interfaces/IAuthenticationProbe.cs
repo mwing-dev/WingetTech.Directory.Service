@@ -1,6 +1,7 @@
-namespace WingetTech.Directory.Service.Core.Interfaces;
-
-public interface IAuthenticationProbe
+namespace WingetTech.Directory.Service.Core.Interfaces
 {
-    Task<bool> TestBindAsync(CancellationToken cancellationToken = default);
+    public interface IAuthenticationProbe
+    {
+        Task<bool> TestBindAsync(CancellationToken cancellationToken = default);
+    }
 }

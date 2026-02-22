@@ -1,6 +1,6 @@
-namespace WingetTech.Directory.Service.Tests;
-
-public class LdapDirectoryServiceTests
+namespace WingetTech.Directory.Service.Tests
 {
+    public class LdapDirectoryServiceTests
+    {
+    }
 }
-
