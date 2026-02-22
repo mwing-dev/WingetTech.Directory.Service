@@ -4,9 +4,6 @@ using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Api.Controllers;
 
-/// <summary>
-/// Controller for managing AD/LDAP connection settings.
-/// </summary>
 [ApiController]
 [Route("api/settings/directory")]
 public class SettingsController : ControllerBase

@@ -18,20 +18,21 @@ public class OrganizationalUnitsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(OrganizationalUnitDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<OrganizationalUnitDto>> GetOrganizationalUnit([FromQuery] string distinguishedName, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<OrganizationalUnitDto>> GetOrganizationalUnit(
+        [FromQuery] string distinguishedName,
+        CancellationToken cancellationToken)
     {
-        var ou = await _directoryService.GetOrganizationalUnitAsync(distinguishedName, cancellationToken);
-        if (ou == null)
-        {
-            return NotFound();
-        }
+        if (string.IsNullOrWhiteSpace(distinguishedName))
+            return BadRequest("A non-empty distinguishedName is required.");
 
-        var ouDto = new OrganizationalUnitDto(
+        var ou = await _directoryService.GetOrganizationalUnitAsync(distinguishedName, cancellationToken);
+        if (ou is null)
+            return NotFound();
+
+        return Ok(new OrganizationalUnitDto(
             ou.Name,
             ou.DistinguishedName,
-            ou.ParentDn
-        );
-
-        return Ok(ouDto);
+            ou.ParentDn));
     }
 }

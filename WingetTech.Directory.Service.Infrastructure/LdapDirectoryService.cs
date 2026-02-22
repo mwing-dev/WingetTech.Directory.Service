@@ -162,9 +162,40 @@ public class LdapDirectoryService : IDirectoryService
     }
 
     /// <inheritdoc />
-    public Task<DirectoryOrganizationalUnit?> GetOrganizationalUnitAsync(string distinguishedName, CancellationToken cancellationToken = default)
+    public async Task<DirectoryOrganizationalUnit?> GetOrganizationalUnitAsync(string distinguishedName, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var settings = await _settingsService.GetAsync();
+        if (settings is null)
+            return null;
+
+        var escapedDn = EscapeLdapFilter(distinguishedName);
+        var filter = $"(&(objectClass=organizationalUnit)(distinguishedName={escapedDn}))";
+
+        return await Task.Run(() =>
+        {
+            using var connection = BuildConnection(settings);
+            Bind(connection, settings);
+
+            var searchRequest = new SearchRequest(
+                settings.BaseDn,
+                filter,
+                SearchScope.Subtree,
+                "ou", "distinguishedName");
+
+            var response = (SearchResponse)connection.SendRequest(searchRequest);
+
+            if (response.Entries.Count == 0)
+                return null;
+
+            var entry = response.Entries[0];
+
+            return new DirectoryOrganizationalUnit
+            {
+                Name = GetStringAttribute(entry, "ou"),
+                DistinguishedName = entry.DistinguishedName,
+                ParentDn = ExtractParentDn(entry.DistinguishedName)
+            };
+        }, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -405,5 +436,14 @@ public class LdapDirectoryService : IDirectoryService
         if (parts.Length > 0 && parts[0].StartsWith("CN=", StringComparison.OrdinalIgnoreCase))
             return parts[0][3..];
         return distinguishedName;
+    }
+
+    private static string? ExtractParentDn(string distinguishedName)
+    {
+        var commaIndex = distinguishedName.IndexOf(',');
+        if (commaIndex < 0 || commaIndex + 1 >= distinguishedName.Length)
+            return null;
+
+        return distinguishedName[(commaIndex + 1)..];
     }
 }
