@@ -4,30 +4,17 @@ using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Api.Controllers;
 
-/// <summary>
-/// Controller for managing directory groups.
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class GroupsController : ControllerBase
 {
     private readonly IDirectoryService _directoryService;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GroupsController"/> class.
-    /// </summary>
-    /// <param name="directoryService">The directory service.</param>
     public GroupsController(IDirectoryService directoryService)
     {
         _directoryService = directoryService;
     }
 
-    /// <summary>
-    /// Gets a group by its name or identifier.
-    /// </summary>
-    /// <param name="identifier">The name or identifier of the group.</param>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>The group if found; otherwise, a 404 Not Found response.</returns>
     [HttpGet("{identifier}")]
     [ProducesResponseType(typeof(GroupDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -49,12 +36,6 @@ public class GroupsController : ControllerBase
         return Ok(groupDto);
     }
 
-    /// <summary>
-    /// Searches for groups matching the specified filter.
-    /// </summary>
-    /// <param name="filter">The search filter to apply.</param>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A collection of groups matching the search criteria.</returns>
     [HttpGet("search")]
     [ProducesResponseType(typeof(GroupSearchResultDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<GroupSearchResultDto>> SearchGroups([FromQuery] string filter, CancellationToken cancellationToken)

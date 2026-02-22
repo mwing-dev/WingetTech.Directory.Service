@@ -4,30 +4,17 @@ using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Api.Controllers;
 
-/// <summary>
-/// Controller for managing directory users.
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
     private readonly IDirectoryService _directoryService;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UsersController"/> class.
-    /// </summary>
-    /// <param name="directoryService">The directory service.</param>
     public UsersController(IDirectoryService directoryService)
     {
         _directoryService = directoryService;
     }
 
-    /// <summary>
-    /// Gets a user by their unique identifier.
-    /// </summary>
-    /// <param name="id">The unique identifier of the user.</param>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>The user if found; otherwise, a 404 Not Found response.</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -54,12 +41,6 @@ public class UsersController : ControllerBase
         return Ok(userDto);
     }
 
-    /// <summary>
-    /// Gets a user by their username.
-    /// </summary>
-    /// <param name="username">The username of the user.</param>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>The user if found; otherwise, a 404 Not Found response.</returns>
     [HttpGet("by-username/{username}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,12 +67,6 @@ public class UsersController : ControllerBase
         return Ok(userDto);
     }
 
-    /// <summary>
-    /// Searches for users matching the specified filter.
-    /// </summary>
-    /// <param name="filter">The search filter to apply.</param>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A collection of users matching the search criteria.</returns>
     [HttpGet("search")]
     [ProducesResponseType(typeof(UserSearchResultDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<UserSearchResultDto>> SearchUsers([FromQuery] string filter, CancellationToken cancellationToken)
@@ -114,12 +89,6 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Gets all groups that a user is a member of.
-    /// </summary>
-    /// <param name="id">The unique identifier of the user.</param>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A collection of groups the user belongs to.</returns>
     [HttpGet("{id}/groups")]
     [ProducesResponseType(typeof(IReadOnlyCollection<GroupDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyCollection<GroupDto>>> GetUserGroups(string id, CancellationToken cancellationToken)

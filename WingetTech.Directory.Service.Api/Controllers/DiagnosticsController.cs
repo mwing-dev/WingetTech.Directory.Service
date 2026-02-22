@@ -4,9 +4,6 @@ using WingetTech.Directory.Service.Core.Interfaces;
 
 namespace WingetTech.Directory.Service.Api.Controllers;
 
-/// <summary>
-/// Controller for diagnostics and health checks.
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class DiagnosticsController : ControllerBase
@@ -14,22 +11,12 @@ public class DiagnosticsController : ControllerBase
     private readonly IDirectoryService _directoryService;
     private readonly IAuthenticationProbe _authenticationProbe;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DiagnosticsController"/> class.
-    /// </summary>
-    /// <param name="directoryService">The directory service.</param>
-    /// <param name="authenticationProbe">The authentication probe.</param>
     public DiagnosticsController(IDirectoryService directoryService, IAuthenticationProbe authenticationProbe)
     {
         _directoryService = directoryService;
         _authenticationProbe = authenticationProbe;
     }
 
-    /// <summary>
-    /// Performs a health check on the directory service.
-    /// </summary>
-    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>The health status of the directory service.</returns>
     [HttpGet("health")]
     [ProducesResponseType(typeof(HealthCheckDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<HealthCheckDto>> HealthCheck(CancellationToken cancellationToken)
@@ -64,7 +51,6 @@ public class DiagnosticsController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Don't leak sensitive details
             var result = new TestBindResponseDto(
                 false,
                 ex.Message,
