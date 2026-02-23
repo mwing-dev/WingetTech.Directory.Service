@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WingetTech.Directory.Service.Contracts;
 using WingetTech.Directory.Service.Core.Interfaces;
@@ -5,6 +6,7 @@ using WingetTech.Directory.Service.Core.Interfaces;
 namespace WingetTech.Directory.Service.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class GroupsController : ControllerBase
     {

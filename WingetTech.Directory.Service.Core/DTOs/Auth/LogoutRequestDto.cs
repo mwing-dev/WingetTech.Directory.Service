@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WingetTech.Directory.Service.Core.DTOs.Auth;
 
 public sealed record LogoutRequestDto(
-    string RefreshToken
+    [property: Required] string RefreshToken
 );
