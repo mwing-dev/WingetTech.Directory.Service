@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Text;
 using WingetTech.Directory.Service.Core.Configuration;
 using WingetTech.Directory.Service.Core.Interfaces;
 using WingetTech.Directory.Service.Infrastructure;
@@ -22,6 +25,26 @@ builder.Services.AddScoped<IDirectorySettingsService, DirectorySettingsService>(
 builder.Services.AddScoped<IEncryptionService, PlainTextEncryptionService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Configure JWT Bearer authentication
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var jwtSecret = jwtSection["Secret"]
+    ?? throw new InvalidOperationException("JWT Secret is not configured. Set 'Jwt:Secret' in application settings.");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidAudience = jwtSection["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+        };
+    });
+
 // Configure EF Core with SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
@@ -43,6 +66,7 @@ app.MapOpenApi().AllowAnonymous();
 app.MapScalarApiReference().AllowAnonymous();
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

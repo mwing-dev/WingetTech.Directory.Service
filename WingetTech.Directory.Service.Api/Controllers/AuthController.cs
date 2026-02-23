@@ -22,6 +22,8 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {
         var response = await _authService.LoginAsync(request, cancellationToken);
+        if (!response.Success)
+            return Unauthorized(response);
         return Ok(response);
     }
 
@@ -32,6 +34,8 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<RefreshTokenResponseDto>> Refresh([FromBody] RefreshTokenRequestDto request, CancellationToken cancellationToken)
     {
         var response = await _authService.RefreshAsync(request, cancellationToken);
+        if (!response.Success)
+            return Unauthorized(response);
         return Ok(response);
     }
 
