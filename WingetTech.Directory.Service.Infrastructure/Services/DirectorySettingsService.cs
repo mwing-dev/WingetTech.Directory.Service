@@ -3,7 +3,7 @@ using WingetTech.Directory.Service.Contracts;
 using WingetTech.Directory.Service.Core.Entities;
 using WingetTech.Directory.Service.Core.Interfaces;
 
-namespace WingetTech.Directory.Service.Infrastructure
+namespace WingetTech.Directory.Service.Infrastructure.Services
 {
     public class DirectorySettingsService : IDirectorySettingsService
     {
