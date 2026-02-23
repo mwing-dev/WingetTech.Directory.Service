@@ -55,5 +55,43 @@ namespace WingetTech.Directory.Service.Infrastructure
                 return false;
             }
         }
+            public async Task<bool> ValidateCredentialsAsync(string username, string password, CancellationToken cancellationToken = default)
+            {
+                var settings = await _directorySettingsService.GetAsync();
+
+                if (settings is null)
+                    throw new InvalidOperationException("Directory settings are not configured.");
+
+                var identifier = new LdapDirectoryIdentifier(settings.Host, settings.Port);
+
+                using var connection = new LdapConnection(identifier)
+                {
+                    AuthType = AuthType.Basic
+                };
+
+                connection.SessionOptions.ProtocolVersion = 3;
+
+                if (settings.UseSsl)
+                    connection.SessionOptions.SecureSocketLayer = true;
+
+                // Build UPN if the username is not already qualified
+                var bindUsername = username.Contains('@') || username.Contains('\\')
+                    ? username
+                    : string.IsNullOrWhiteSpace(settings.Domain)
+                        ? username
+                        : $"{username}@{settings.Domain}";
+
+                var credential = new NetworkCredential(bindUsername, password);
+
+                try
+                {
+                    await Task.Run(() => connection.Bind(credential), cancellationToken);
+                    return true;
+                }
+                catch (LdapException)
+                {
+                    return false;
+                }
+            }
+        }
     }
-}

@@ -8,6 +8,7 @@ namespace WingetTech.Directory.Service.Infrastructure
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<DirectorySettings> DirectorySettings => Set<DirectorySettings>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,6 +20,14 @@ namespace WingetTech.Directory.Service.Infrastructure
                 entity.Property(e => e.BaseDn).IsRequired();
                 entity.Property(e => e.BindUsername).IsRequired();
                 entity.Property(e => e.BindPassword).IsRequired();
+            });
+
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Token).IsRequired();
+                entity.Property(e => e.Username).IsRequired();
+                entity.HasIndex(e => e.Token).IsUnique();
             });
         }
     }

@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using WingetTech.Directory.Service.Core.Configuration;
 using WingetTech.Directory.Service.Core.Interfaces;
 using WingetTech.Directory.Service.Infrastructure;
+using WingetTech.Directory.Service.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +14,13 @@ builder.Services.AddEndpointsApiExplorer(); // required for controllers
 builder.Services.AddOpenApi();              // generates the OpenAPI document
 
 // Register directory service
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IDirectoryService, LdapDirectoryService>();
 builder.Services.AddScoped<IAuthenticationProbe, LdapAuthenticationProbe>();
 builder.Services.AddScoped<IDirectorySettingsService, DirectorySettingsService>();
 builder.Services.AddScoped<IEncryptionService, PlainTextEncryptionService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure EF Core with SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
