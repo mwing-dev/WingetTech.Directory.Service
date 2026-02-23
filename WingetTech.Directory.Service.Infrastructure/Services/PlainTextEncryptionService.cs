@@ -1,6 +1,6 @@
 using WingetTech.Directory.Service.Core.Interfaces;
 
-namespace WingetTech.Directory.Service.Infrastructure
+namespace WingetTech.Directory.Service.Infrastructure.Services
 {
     /// WARNING: This implementation stores credentials as plain text.
     public class PlainTextEncryptionService : IEncryptionService

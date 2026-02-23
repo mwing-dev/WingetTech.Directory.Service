@@ -2,7 +2,7 @@ using System.DirectoryServices.Protocols;
 using System.Net;
 using WingetTech.Directory.Service.Core.Interfaces;
 
-namespace WingetTech.Directory.Service.Infrastructure
+namespace WingetTech.Directory.Service.Infrastructure.Services
 {
     public class LdapAuthenticationProbe : IAuthenticationProbe
     {
