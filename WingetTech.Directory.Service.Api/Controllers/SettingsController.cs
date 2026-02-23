@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WingetTech.Directory.Service.Contracts;
 using WingetTech.Directory.Service.Core.Interfaces;
@@ -5,14 +6,17 @@ using WingetTech.Directory.Service.Core.Interfaces;
 namespace WingetTech.Directory.Service.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/settings/directory")]
     public class SettingsController : ControllerBase
     {
         private readonly IDirectorySettingsService _settingsService;
+        private readonly ILogger<SettingsController> _logger;
 
-        public SettingsController(IDirectorySettingsService settingsService)
+        public SettingsController(IDirectorySettingsService settingsService, ILogger<SettingsController> logger)
         {
             _settingsService = settingsService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -21,6 +25,7 @@ namespace WingetTech.Directory.Service.Api.Controllers
         public async Task<IActionResult> Save([FromBody] DirectorySettingsDto dto)
         {
             await _settingsService.SaveAsync(dto);
+            _logger.LogInformation("Directory settings updated by {User}", User.Identity?.Name);
             return Ok();
         }
 
@@ -34,7 +39,17 @@ namespace WingetTech.Directory.Service.Api.Controllers
             if (settings is null)
                 return NotFound();
 
-            return Ok(settings);
+            // Never return the bind password in plaintext
+            return Ok(new DirectorySettingsDto
+            {
+                Host = settings.Host,
+                Port = settings.Port,
+                UseSsl = settings.UseSsl,
+                Domain = settings.Domain,
+                BaseDn = settings.BaseDn,
+                BindUsername = settings.BindUsername,
+                BindPassword = "[REDACTED]"
+            });
         }
     }
 }

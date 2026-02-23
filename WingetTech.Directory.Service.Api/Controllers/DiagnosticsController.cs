@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WingetTech.Directory.Service.Contracts;
 using WingetTech.Directory.Service.Core.Interfaces;
@@ -5,57 +6,47 @@ using WingetTech.Directory.Service.Core.Interfaces;
 namespace WingetTech.Directory.Service.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class DiagnosticsController : ControllerBase
     {
-        private readonly IDirectoryService _directoryService;
         private readonly IAuthenticationProbe _authenticationProbe;
+        private readonly ILogger<DiagnosticsController> _logger;
 
-        public DiagnosticsController(IDirectoryService directoryService, IAuthenticationProbe authenticationProbe)
+        public DiagnosticsController(IAuthenticationProbe authenticationProbe, ILogger<DiagnosticsController> logger)
         {
-            _directoryService = directoryService;
             _authenticationProbe = authenticationProbe;
-        }
-
-        [HttpGet("health")]
-        [ProducesResponseType(typeof(HealthCheckDto), StatusCodes.Status200OK)]
-        public async Task<ActionResult<HealthCheckDto>> HealthCheck(CancellationToken cancellationToken)
-        {
-            var isHealthy = await _directoryService.HealthCheckAsync(cancellationToken);
-
-            var result = new HealthCheckDto(
-                isHealthy,
-                isHealthy ? "Directory service is healthy" : "Directory service is unhealthy",
-                DateTime.UtcNow
-            );
-
-            return Ok(result);
+            _logger = logger;
         }
 
         [HttpPost("test-bind")]
         [ProducesResponseType(typeof(TestBindResponseDto), StatusCodes.Status200OK)]
-        public async Task<ActionResult<TestBindResponseDto>> TestBind(
-            CancellationToken cancellationToken)
+        public async Task<ActionResult<TestBindResponseDto>> TestBind(CancellationToken cancellationToken)
         {
             try
             {
                 var success = await _authenticationProbe.TestBindAsync(cancellationToken);
 
+                if (!success)
+                {
+                    _logger.LogWarning("LDAP test-bind failed");
+                }
+
                 var result = new TestBindResponseDto(
                     success,
-                    success ? null : "LDAP bind failed.",
-                    DateTime.UtcNow
-                );
+                    success ? null : "Directory bind failed. Check server logs for details.",
+                    DateTime.UtcNow);
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "LDAP test-bind threw an exception");
+
                 var result = new TestBindResponseDto(
                     false,
-                    ex.Message,
-                    DateTime.UtcNow
-                );
+                    "Directory bind failed. Check server logs for details.",
+                    DateTime.UtcNow);
 
                 return Ok(result);
             }
