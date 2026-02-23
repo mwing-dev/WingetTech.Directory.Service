@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using WingetTech.Directory.Service.Core.DTOs.Auth;
 using WingetTech.Directory.Service.Core.Interfaces;
 
@@ -9,13 +10,16 @@ namespace WingetTech.Directory.Service.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger)
     {
         _authService = authService;
+        _logger = logger;
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("login")]
     [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -23,7 +27,7 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.LoginAsync(request, cancellationToken);
         if (!response.Success)
-            return Unauthorized(response);
+            return Unauthorized(new { message = "Invalid username or password." });
         return Ok(response);
     }
 
@@ -35,7 +39,7 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.RefreshAsync(request, cancellationToken);
         if (!response.Success)
-            return Unauthorized(response);
+            return Unauthorized(new { message = "Invalid or expired refresh token." });
         return Ok(response);
     }
 
