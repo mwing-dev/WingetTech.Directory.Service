@@ -67,10 +67,39 @@ Configure directory service settings in `appsettings.json`:
 
 ## API Endpoints
 
-### Health Check
+### Health & Diagnostics
 
 - **GET** `/health` - General health status
 - **GET** `/api/health` - Detailed health information
+- **GET** `/api/diagnostics/health` - LDAP connectivity health check
+- **POST** `/api/diagnostics/test-bind` - Validate LDAP service-account bind
+
+### Authentication
+
+- **POST** `/api/auth/login` - Authenticate and receive JWT access + refresh tokens
+- **POST** `/api/auth/refresh` - Exchange a refresh token for a new access token
+- **POST** `/api/auth/logout` - Revoke a refresh token
+
+### Settings
+
+- **GET** `/api/settings/directory` - Retrieve current LDAP settings
+- **POST** `/api/settings/directory` - Save LDAP settings
+
+### Users
+
+- **GET** `/api/users/{id}` - Get user by GUID
+- **GET** `/api/users/by-username/{username}` - Get user by sAMAccountName
+- **GET** `/api/users/search?q={term}` - Search users by name or username
+- **GET** `/api/users/{id}/groups` - List groups the user belongs to
+
+### Groups
+
+- **GET** `/api/groups/{identifier}` - Get group by GUID or distinguished name
+- **GET** `/api/groups/search?q={term}` - Search groups by name
+
+### Organizational Units
+
+- **GET** `/api/organizational-units` - List organizational units
 
 ## Project Details
 
@@ -102,7 +131,15 @@ ASP.NET Core Web API with:
 
 ## Development Status
 
-🚧 **Work in Progress**: LDAP operations are stubbed and ready for implementation.
+The core LDAP operations (users, groups, organisational units, health check, test bind, settings, and JWT issuance) are implemented. The following areas require work before any production deployment:
+
+- JWT validation middleware is not yet wired — tokens are issued but not enforced on inbound requests
+- `PlainTextEncryptionService` stores bind passwords unencrypted — a real encryption implementation is needed
+- No MFA support is present
+- Multi-tenancy scaffolding is absent
+- The test project contains no test methods
+
+See [FEATURE_MATRIX.md](FEATURE_MATRIX.md) for the full feature completion matrix and pre-production checklists.
 
 ## License
 
