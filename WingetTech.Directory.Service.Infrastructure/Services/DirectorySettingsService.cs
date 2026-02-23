@@ -15,9 +15,9 @@ namespace WingetTech.Directory.Service.Infrastructure.Services
             _db = db;
             _encryption = encryption;
         }
-        public async Task SaveAsync(DirectorySettingsDto dto)
+        public async Task SaveAsync(DirectorySettingsDto dto, CancellationToken cancellationToken = default)
         {
-            var existing = await _db.DirectorySettings.FirstOrDefaultAsync();
+            var existing = await _db.DirectorySettings.FirstOrDefaultAsync(cancellationToken);
 
             if (existing is null)
             {
@@ -47,11 +47,11 @@ namespace WingetTech.Directory.Service.Infrastructure.Services
                 existing.UpdatedUtc = DateTime.UtcNow;
             }
 
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(cancellationToken);
         }
-        public async Task<DirectorySettingsDto?> GetAsync()
+        public async Task<DirectorySettingsDto?> GetAsync(CancellationToken cancellationToken = default)
         {
-            var settings = await _db.DirectorySettings.FirstOrDefaultAsync();
+            var settings = await _db.DirectorySettings.FirstOrDefaultAsync(cancellationToken);
 
             if (settings is null)
                 return null;
@@ -66,6 +66,10 @@ namespace WingetTech.Directory.Service.Infrastructure.Services
                 BindUsername = settings.BindUsername,
                 BindPassword = _encryption.Decrypt(settings.BindPassword)
             };
+        }
+        public async Task<bool> HasSettingsAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.DirectorySettings.AnyAsync(cancellationToken);
         }
     }
 }
