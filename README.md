@@ -140,11 +140,3 @@ The core LDAP operations (users, groups, organisational units, health check, tes
 - The test project contains no test methods
 
 See [FEATURE_MATRIX.md](FEATURE_MATRIX.md) for the full feature completion matrix and pre-production checklists.
-
-## License
-
-[Specify your license here]
-
-## Contributing
-
-[Specify contribution guidelines here]
